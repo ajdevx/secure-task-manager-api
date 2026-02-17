@@ -12,11 +12,11 @@ const userSchema = new mongoose.Schema({
         minlength : 6,
         select: false //prevent them from being returned accidentally
     },
-    phoneNumber: {
+    email: {
         type: String,//minlength and maxlength does not work for  a number
         unique: true,
-        required: [true, "phoneNumber is required"],
-        match: [/^[0-9]{10}$/,"phoneNumber should be exactly 10 digits"] // regex expression to check length at data base level
+        required: [true, "email is required"],
+        match :[/^[^\s@]+@[^\s@]+\.[^\s@]+$/,"Please enter a valid email"]
     },
     isPhoneNumberVerified:{
         type: Boolean,
@@ -37,4 +37,6 @@ const userSchema = new mongoose.Schema({
     }
 },{timestamps:true})
 
-export const User = mongoose.model("User",userSchema)
+export const User = mongoose.model("User",userSchema);
+
+
