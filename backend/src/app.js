@@ -17,6 +17,12 @@ app.use(express.urlencoded({
 app.use(cookieParser())
 app.use(express.static("public"))
 
+//defining routes
+import userRouter from "./routes/user.route.js"
+import forgotPasswordRoute from "./routes/otp.route.js"
+app.use("/app/v1/users",userRouter);
+app.use("/app/v1/auth",forgotPasswordRoute);
+
 export {app}
 
   

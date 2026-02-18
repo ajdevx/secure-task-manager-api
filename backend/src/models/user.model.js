@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         required: [true, "email is required"],
         match :[/^[^\s@]+@[^\s@]+\.[^\s@]+$/,"Please enter a valid email"]
     },
-    isPhoneNumberVerified:{
+    isEmailVerified:{
         type: Boolean,
         default: false
     },
