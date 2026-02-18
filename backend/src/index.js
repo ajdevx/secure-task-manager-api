@@ -5,13 +5,13 @@ import {connectDB} from "./db/index.js"
 connectDB()
 .then(()=>{
     app.on("error",()=>{
-        console.log("error comming in talking db with node application")
+        console.log("Application not able to talk to express",error);
     })
-    app.listen(4000,()=>{
-        console.log("server started");
+    app.listen(process.env.PORT||8000,()=>{
+        console.log(`Server started at port ${process.env.PORT||8000}`);
     })
 }).catch((error)=>{
-    console.log(error,"there is an error connectin to db")
+    console.log("Application not able to talk with express",error)
     process.exit(1)
 })
 
