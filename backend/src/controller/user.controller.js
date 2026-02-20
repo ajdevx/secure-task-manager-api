@@ -32,7 +32,10 @@ if(existingUser) throw new ApiError(400, "User already exist");
 //take image path from multer middleware
 const avatarLocalPath = req.file?.path;
 //uploading avatar to cloudinary
-const avatar = await uploadOnCloudinary(avatarLocalPath);
+//const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+
+
 
 
 
