@@ -7,10 +7,12 @@ const verifyJWT = asyncHandler(async(req,res,next)=>{
     const token = req.header("Authorization")?.replace("Bearer ","");
 
     if(!token) throw new ApiError(401, "Unauthorized access")
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRE)
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
     const user = await User.findById(decodeToken?._id)
     if(!user) throw new ApiError(401, "User does not exists")
         req.user = user;
     next();
 })
+
+export {verifyJwt}

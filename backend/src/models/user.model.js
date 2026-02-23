@@ -34,10 +34,6 @@ const userSchema = new mongoose.Schema({
     resetOtpExpiry:{
         type: Date
     },
-    resetOtpToken:{
-        type: String,
-        select: false
-    },
     avatar:{
         type:String
     }

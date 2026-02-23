@@ -5,7 +5,6 @@ import {generateOtp} from "../utils/generateOtp.js"
 import {sendMail} from "../utils/sendMail.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
 
 const forgotPassword = asyncHandler(async(req,res)=>{
     const {email} = req.body;
@@ -23,21 +22,10 @@ const forgotPassword = asyncHandler(async(req,res)=>{
     user.resetOtp = await bcrypt.hash(code,7);
     user.resetOtpExpiry = Date.now()+ 5*60*1000;
 
-//sending  resetOtpToken
-   const options = {
-        httpOnly: true,
-        secure: true
-    }
-    const resetOtpToken = jwt.sign({
-        email: user.email,
-    },process.env.RESET_OTP_SECRET,
-    {expiresIn: process.env.RESET_OTP_EXPIRY_IN}
-)
 
     await user.save({validateBeforeSave: false })
 
       return res.status(201)
-      .cookie("resetOtpToken",resetOtpToken,options)
       .json(new ApiResponse(
         200, "Otp sent successfully")
     )
@@ -45,4 +33,65 @@ const forgotPassword = asyncHandler(async(req,res)=>{
     
 })
 
-export {forgotPassword}
+//verify Otp 
+const verifyOtp = asyncHandler(async(req, res)=>{
+    const {email, resetOtp} = req.body;
+    
+
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new ApiError(401, "User does not exist");
+    }
+    const isOtpValid = await bcrypt.compare(
+        resetOtp.toString(),
+        user.resetOtp
+    );
+        if (!isOtpValid) {
+        throw new ApiError(400, "Invalid OTP");
+    }
+    if(user.resetOtpExpiry < Date.now()){
+        throw new ApiError(400, "OTP expired");
+    }
+    return res.json(
+                    new ApiResponse(201,"Otp success fully verified")
+                  )
+    
+
+
+})
+
+//reset password 
+const resetPassword = asyncHandler(async(req, res)=>{
+    const {email, resetOtp, password} = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new ApiError(401, "User does not exist");
+    }
+    const isOtpValid = await bcrypt.compare(
+        resetOtp.toString(),
+        user.resetOtp
+    );
+        if (!isOtpValid) {
+        throw new ApiError(400, "Invalid OTP");
+    }
+        if(user.resetOtpExpiry < Date.now()){
+        throw new ApiError(400, "OTP expired");
+    }
+
+    const newPassword = await bcrypt.hash(password,10);
+    user.password = newPassword;
+    await user.save();
+    return res.json(
+                    new ApiResponse(201,"Password has been changed")
+                  )
+
+
+
+})
+
+
+export {forgotPassword,
+    verifyOtp,
+    resetPassword
+}
