@@ -75,9 +75,9 @@ const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._i
 
     return res.status(201)
                .cookie("accessToken", accessToken, options)
-              .cookie("refreshToken", refreshToken, options)
-              .json(
-                new ApiResponse(201,createdUser, "User Sign in successessfull")
+               .cookie("refreshToken", refreshToken, options)
+               .json(
+                 new ApiResponse(201,createdUser, "User Sign in successessfull")
               )
    })
 

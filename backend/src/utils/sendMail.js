@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
-export const sendMail = async (mail,code) => {
+ const sendMail = async (mail,code) => {
   const info = await transporter.sendMail({
     from: 'Secure-task-manager-api',
     to: mail,
@@ -80,3 +80,5 @@ export const sendMail = async (mail,code) => {
 
   console.log("Message sent:", info.messageId);
 };
+
+export {sendMail};
