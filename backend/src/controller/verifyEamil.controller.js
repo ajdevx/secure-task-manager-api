@@ -7,7 +7,9 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 const sendOtpForEmail = asyncHandler(async(req, res) =>{
+    
     const token = req.header("Authorization")?.replace("Bearer ","");
+    if(!token) throw new ApiError(401, "Unauthorized access")
     const decode = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
 
     const otp = Math.floor(Math.random()*1000000) +"";
@@ -24,17 +26,17 @@ const sendOtpForEmail = asyncHandler(async(req, res) =>{
 
     return res.status(201)
       .json(new ApiResponse(
-        200, "Otp sent successfully")
+        200, `Otp sent successfully${otp}`)
     )
 
 })
 const verifyEmail = asyncHandler(async(req, res) =>{
-        const {OTP } = req.body;
-        const token = req.header("Authorization")?.replace("Bearer ","");
-        const decode = jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
         
-        const user = await User.findOne({email: decode.email});
-        if(!OTP == user.resetOtp) throw new ApiError(400,"Wrong otp");
+        const {OTP } = req.body;
+        const user = req.user;
+        const isMatch = await bcrypt.compare(OTP, user.resetOtp);
+        
+       if(!isMatch) throw new ApiError(400,"Wrong otp");
         if(user.resetOtpExpiry < Date.now()) throw new ApiError(400, "Otp expired");
         
         user.isEmailVerified = true;
