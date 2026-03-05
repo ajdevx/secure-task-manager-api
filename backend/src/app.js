@@ -21,8 +21,10 @@ app.use(express.static("public"))
 //defining routes
 import userRouter from "./routes/user.route.js"
 import forgotPasswordRoute from "./routes/otp.route.js"
+import todoRoute from "./routes/todos.route.js"
 app.use("/app/v1/users",userRouter);
 app.use("/app/v1/auth",forgotPasswordRoute);
+app.use("/app/v1/todos",todoRoute)
 
 export {app}
 
