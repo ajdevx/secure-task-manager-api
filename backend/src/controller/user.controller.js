@@ -2,6 +2,7 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 import {User} from "../models/user.model.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
+import bcrypt from "bcrypt"
 
 const generateAccessAndRefreshTokens = async (userId) =>{
     try{
@@ -11,6 +12,8 @@ const generateAccessAndRefreshTokens = async (userId) =>{
         const refreshToken = user.generateRefreshToken();
         user.refreshToken = refreshToken;
         await user.save({validateBeforeSave: false});
+             console.log(accessToken);
+     console.log(refreshToken);
         return {accessToken, refreshToken};
     }catch(err){
         console.log(err);
@@ -81,13 +84,52 @@ const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._i
               )
    })
 
+const loginUser = asyncHandler(async(req,res) =>{
+    const {email, password} = req.body;
+    if(!email) throw new ApiError(400, "email is a necessary field");
+    if(!password) throw new ApiError(400," password is a necessary field");
+
+     const user = await User.findOne({email:email}).select("password");
+     if(!user) throw new ApiError(400,"email does not exists");
+
+     console.log(user);
+     const isPasswordCorrect = await bcrypt.compare(password, user.password);
+     if(!isPasswordCorrect) throw new ApiError(400,"wrong password");
+    
+
+     //if condition is correct provide tokens
+     const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id);
+     console.log(accessToken);
+     console.log(refreshToken);
+     const options = {
+        httpOnly: true,
+        secure: true
+     }
+     return res.status(201)
+                .cookie("accessToken",accessToken,options)
+                .cookie("refreshToken",refreshToken, options)
+                .json(new ApiResponse(201,user, "User Login successessfull"));
+
+})
+
+const logoutUser = asyncHandler(async(req, res) =>{
+    
+    const user = await User.findById(req.user._id).select("+refreshToken");
+    user.refreshToken = "";
+    await user.save();
+
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+
+    res.status(200)
+        .clearCookie("accessToken",options)
+        .clearCookie("refreshToken",options)
+        .json(new ApiResponse(200,"user logout"));
+
+})
 
 
 
-
-   
-
-
-
-
-export{registerUser}
+export{registerUser,loginUser,logoutUser}
