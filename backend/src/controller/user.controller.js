@@ -74,7 +74,7 @@ const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._i
         httpOnly: true,
         secure: true
     }
-   
+   console.log(accessToken);
 
     return res.status(201)
                .cookie("accessToken", accessToken, options)
